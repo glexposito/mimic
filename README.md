@@ -168,7 +168,7 @@ dotnet run --project Mimic.Server -- --urls http://localhost:5000 --config ./cli
 Then call a configured endpoint:
 
 ```bash
-curl http://localhost:5213/hello
+curl http://localhost:5000/hello
 ```
 
 Example response:
