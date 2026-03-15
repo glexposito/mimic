@@ -22,7 +22,7 @@ public sealed class FileMockApiConfigProvider : IMockApiConfigProvider
     {
         if (File.Exists(fullPath))
         {
-            return [loader.Load(fullPath)];
+            return [MockApiConfigLoader.Load(fullPath)];
         }
 
         if (Directory.Exists(fullPath))
@@ -38,7 +38,7 @@ public sealed class FileMockApiConfigProvider : IMockApiConfigProvider
                 throw new InvalidOperationException($"No YAML config files were found in '{fullPath}'.");
             }
 
-            return [.. configFiles.Select(loader.Load)];
+            return [.. configFiles.Select(MockApiConfigLoader.Load)];
         }
 
         throw new FileNotFoundException($"Mock config path '{fullPath}' was not found.", fullPath);

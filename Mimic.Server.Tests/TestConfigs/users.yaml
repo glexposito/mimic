@@ -1,0 +1,18 @@
+name: users-api
+
+endpoints:
+  - method: GET
+    path: /users/1
+    respond:
+      status: 200
+      body:
+        user:
+          id: 1
+          addresses:
+            - type: home
+              city: Auckland
+            - type: work
+              city: Wellington
+          profile:
+            name: Alice
+            active: true

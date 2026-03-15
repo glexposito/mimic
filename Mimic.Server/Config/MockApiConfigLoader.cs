@@ -6,7 +6,20 @@ namespace Mimic.Server.Config;
 
 public sealed class MockApiConfigLoader
 {
-    public MockApiConfig Load(string path)
+    private const string ValidMethodsDisplay = "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT";
+
+    private static readonly HashSet<string> ValidMethods =
+    [
+        "DELETE",
+        "GET",
+        "HEAD",
+        "OPTIONS",
+        "PATCH",
+        "POST",
+        "PUT"
+    ];
+
+    public static MockApiConfig Load(string path)
     {
         if (!File.Exists(path))
         {
@@ -16,10 +29,11 @@ public sealed class MockApiConfigLoader
         var yaml = File.ReadAllText(path);
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .WithAttemptingUnquotedStringTypeDeserialization()
             .IgnoreUnmatchedProperties()
             .Build();
 
-        var config = deserializer.Deserialize<MockApiConfig>(yaml) ?? new MockApiConfig();
+        var config = deserializer.Deserialize<MockApiConfig>(yaml);
         Normalize(config);
         Validate(config, path);
         return config;
@@ -32,7 +46,7 @@ public sealed class MockApiConfigLoader
         foreach (var endpoint in config.Endpoints)
         {
             endpoint.Method = endpoint.Method.Trim().ToUpperInvariant();
-            endpoint.Path = NormalizePath(endpoint.Path);
+            endpoint.Path = endpoint.Path.Trim();
             endpoint.Respond.Headers = NormalizeHeaders(endpoint.Respond.Headers);
         }
     }
@@ -41,7 +55,8 @@ public sealed class MockApiConfigLoader
     {
         if (string.IsNullOrWhiteSpace(config.Name))
         {
-            throw new InvalidOperationException($"Mock configuration '{path}' must define a name.");
+            throw new MimicConfigValidationException(
+                $"Mock configuration '{path}' is invalid: 'name' is required.");
         }
 
         for (var i = 0; i < config.Endpoints.Count; i++)
@@ -50,26 +65,28 @@ public sealed class MockApiConfigLoader
 
             if (string.IsNullOrWhiteSpace(endpoint.Method))
             {
-                throw new InvalidOperationException($"Endpoint at index {i} in '{path}' must define a method.");
+                throw new MimicConfigValidationException(
+                    $"Mock configuration '{path}' is invalid: endpoint[{i}].method is required.");
+            }
+
+            if (!ValidMethods.Contains(endpoint.Method))
+            {
+                throw new MimicConfigValidationException(
+                    $"Mock configuration '{path}' is invalid: endpoint[{i}].method has unsupported value '{endpoint.Method}'. Allowed values: {ValidMethodsDisplay}.");
             }
 
             if (string.IsNullOrWhiteSpace(endpoint.Path))
             {
-                throw new InvalidOperationException($"Endpoint at index {i} in '{path}' must define a path.");
+                throw new MimicConfigValidationException(
+                    $"Mock configuration '{path}' is invalid: endpoint[{i}].path is required.");
+            }
+
+            if (!endpoint.Path.StartsWith('/'))
+            {
+                throw new MimicConfigValidationException(
+                    $"Mock configuration '{path}' is invalid: endpoint[{i}].path has invalid value '{endpoint.Path}'. Paths must start with '/'.");
             }
         }
-    }
-
-    private static string NormalizePath(string path)
-    {
-        var trimmedPath = path.Trim();
-        if (string.IsNullOrEmpty(trimmedPath))
-        {
-            return "/";
-        }
-
-        trimmedPath = trimmedPath.Trim('/');
-        return trimmedPath.Length == 0 ? "/" : $"/{trimmedPath}";
     }
 
     private static Dictionary<string, string> NormalizeHeaders(Dictionary<string, string> headers)
