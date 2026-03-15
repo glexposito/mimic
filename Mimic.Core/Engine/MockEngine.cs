@@ -24,7 +24,7 @@ public class MockEngine(PathMatcher pathMatcher)
                     continue;
                 }
 
-                return endpoint.Respond;
+                return endpoint.Response;
             }
         }
 

@@ -19,7 +19,7 @@ public sealed class MockApiConfigLoaderTests
             endpoints:
               - method: FETCH
                 path: /users/1
-                respond:
+                response:
                   status: 200
             """);
 
@@ -51,7 +51,7 @@ public sealed class MockApiConfigLoaderTests
             endpoints:
               - method: GET
                 path: users/1
-                respond:
+                response:
                   status: 200
             """);
 

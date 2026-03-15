@@ -47,7 +47,7 @@ public sealed class MockApiConfigLoader
         {
             endpoint.Method = endpoint.Method.Trim().ToUpperInvariant();
             endpoint.Path = endpoint.Path.Trim();
-            endpoint.Respond.Headers = NormalizeHeaders(endpoint.Respond.Headers);
+            endpoint.Response.Headers = NormalizeHeaders(endpoint.Response.Headers);
         }
     }
 

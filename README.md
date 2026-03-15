@@ -114,8 +114,10 @@ name: users-api
 endpoints:
   - method: GET
     path: /hello
-    respond:
+    response:
       status: 200
+      headers:
+        X-Environment: local
       body:
         message: hello from mimic
 ```
