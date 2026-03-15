@@ -1,41 +1,45 @@
-var builder = WebApplication.CreateBuilder(args);
+using Mimic.Core.Engine;
+using Mimic.Core.Routing;
+using Mimic.Server.Config;
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddCommandLine(args, new Dictionary<string, string>
+{
+    ["--config"] = "Mimic:ConfigPath"
+});
+
+builder.Services.AddSingleton<MockApiConfigLoader>();
+builder.Services.AddSingleton<IMockApiConfigProvider, FileMockApiConfigProvider>();
+builder.Services.AddSingleton<PathMatcher>();
+builder.Services.AddSingleton<MockEngine>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.Map("/{**path}", async (string? path, HttpContext ctx, MockEngine engine, IMockApiConfigProvider configProvider) =>
 {
-    app.MapOpenApi();
-}
+    var method = ctx.Request.Method;
+    var requestPath = path is null ? "/" : $"/{path}";
+    var config = configProvider.GetCurrent();
 
-app.UseHttpsRedirection();
+    var response = engine.Handle(config, method, requestPath);
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
+    if (response is null)
     {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast");
+        ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+        await ctx.Response.WriteAsync("No mock matched");
+        return;
+    }
+
+    ctx.Response.StatusCode = response.Status;
+
+    foreach (var header in response.Headers)
+    {
+        ctx.Response.Headers[header.Key] = header.Value;
+    }
+
+    await ctx.Response.WriteAsJsonAsync(response.Body);
+});
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+public abstract partial class Program;

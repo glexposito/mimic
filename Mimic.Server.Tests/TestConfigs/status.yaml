@@ -1,0 +1,9 @@
+name: status-api
+
+endpoints:
+  - method: GET
+    path: /status
+    respond:
+      status: 200
+      body:
+        state: ok

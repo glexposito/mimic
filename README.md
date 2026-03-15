@@ -57,15 +57,15 @@ This is intended to be one of Mimic’s core strengths.
 
 Mimic is still in active development and is not ready for real use yet.
 
-At this stage, the project is only a skeleton for the planned MVP.
+At this stage, the project is an early MVP foundation.
 
-The current goal is to build the foundations for a version that can eventually:
+The current implementation can already:
 
 - load mock API definitions from YAML
 - match incoming HTTP requests
 - return configured responses
 
-It is not feature-complete and is not ready for production or testing use yet.
+It is still not feature-complete and is not ready for production use yet.
 
 Not included in the MVP yet:
 
@@ -118,12 +118,26 @@ Matches incoming request paths against configured templates, such as `/users/{id
 
 ---
 
-## Intended Future Usage
+## Running Mimic
 
-Once the basic server flow is implemented, Mimic is expected to be used like this:
+Mimic can currently load either a single YAML file or a folder containing multiple YAML files.
+
+Run with the default `mocks.yaml` in the server project:
 
 ```bash
-dotnet run --project src/Mimic.Server
+dotnet run --project Mimic.Server
+```
+
+Run with an explicit file:
+
+```bash
+dotnet run --project Mimic.Server -- --config client.yaml
+```
+
+Run with a folder of YAML files:
+
+```bash
+dotnet run --project Mimic.Server -- --config ./clients
 ```
 
 Then call a configured endpoint:
@@ -140,7 +154,20 @@ Example response:
 }
 ```
 
-This is not working yet and is included only to illustrate the intended direction of the project.
+---
+
+## Testing
+
+The server currently has end-to-end tests that verify:
+
+- a configured endpoint returns the expected response
+- an unmatched request returns `404`
+
+Run the test suite with:
+
+```bash
+dotnet test
+```
 
 ---
 

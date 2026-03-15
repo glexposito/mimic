@@ -1,0 +1,9 @@
+name: users-api
+
+endpoints:
+  - method: GET
+    path: /hello
+    respond:
+      status: 200
+      body:
+        message: hello from mimic
