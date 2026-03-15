@@ -1,4 +1,4 @@
-# Mimic
+# 🎭 Mimic
 
 **Mimic** is a lightweight, declarative mock API server powered by **YAML**.
 
