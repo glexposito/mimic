@@ -118,27 +118,29 @@ Matches incoming request paths against configured templates, such as `/users/{id
 
 ---
 
-## Running Mimic
+## Intended Future Usage
 
-From the server project:
+Once the basic server flow is implemented, Mimic is expected to be used like this:
 
 ```bash
 dotnet run --project src/Mimic.Server
 ```
 
-Then call an endpoint:
+Then call a configured endpoint:
 
 ```bash
 curl http://localhost:5000/hello
 ```
 
-Response:
+Example response:
 
 ```json
 {
   "message": "hello from mimic"
 }
 ```
+
+This is not working yet and is included only to illustrate the intended direction of the project.
 
 ---
 
