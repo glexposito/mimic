@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Mimic.Core/Mimic.Core.csproj" />
+  <Project Path="Mimic.Server/Mimic.Server.csproj" />
+</Solution>
