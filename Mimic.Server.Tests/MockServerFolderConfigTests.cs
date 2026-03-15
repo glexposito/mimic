@@ -34,11 +34,20 @@ public sealed class MockServerFolderConfigTests : IClassFixture<WebApplicationFa
         var response = await _client.GetAsync("/hello");
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        response.Headers.GetValues("X-Test-Header").Single().ShouldBe("hello-header");
-        response.Headers.GetValues("X-Trace-Id").Single().ShouldBe("trace-123");
         var body = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
         body.ShouldNotBeNull();
         body["message"].ShouldBe("hello from folder");
+    }
+
+    [Fact]
+    public async Task HeadHello_ReturnsConfiguredHeaders()
+    {
+        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Head, "/hello"));
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Headers.GetValues("X-Test-Header").Single().ShouldBe("hello-header");
+        response.Headers.GetValues("X-Trace-Id").Single().ShouldBe("trace-123");
+        (await response.Content.ReadAsStringAsync()).ShouldBeEmpty();
     }
 
     [Fact]

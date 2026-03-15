@@ -5,8 +5,12 @@ endpoints:
     path: /hello
     response:
       status: 200
+      body:
+        message: hello from folder
+  - method: HEAD
+    path: /hello
+    response:
+      status: 200
       headers:
         X-Test-Header: hello-header
         X-Trace-Id: trace-123
-      body:
-        message: hello from folder

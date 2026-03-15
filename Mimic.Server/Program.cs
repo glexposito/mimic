@@ -37,6 +37,11 @@ app.Map("/{**path}", async (string? path, HttpContext ctx, MockEngine engine, IM
         ctx.Response.Headers[header.Key] = header.Value;
     }
 
+    if (HttpMethods.IsHead(method))
+    {
+        return;
+    }
+
     await ctx.Response.WriteAsJsonAsync(response.Body);
 });
 
