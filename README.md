@@ -13,6 +13,15 @@ Mimic is designed to be:
 
 The goal is to make API mocking easy for development, testing, and integration scenarios.
 
+Mimic’s long-term value is not only that it can mock APIs, but that mock definitions can live as portable YAML and run anywhere as a standalone dependency.
+
+That means the main direction for Mimic is:
+
+- define mocks in YAML
+- keep them language-agnostic and version-controlled
+- run them locally, in CI, or in Docker
+- use them from any stack, including Testcontainers-based integration tests
+
 ---
 
 ## Why Mimic?
@@ -27,6 +36,10 @@ Many teams need to simulate external APIs during development and testing, but ex
 Mimic takes a different approach.
 
 You define mock APIs in **YAML**, run Mimic, and it serves those endpoints over HTTP.
+
+The core idea is that the mock definition itself should be portable.
+
+It should not matter whether the consumer is written in C#, Java, JavaScript, Python, Go, or something else. The same mock API definition should be reusable across all of them.
 
 That makes it especially useful for:
 
@@ -49,13 +62,15 @@ That means teams can:
 
 This is intended to be one of Mimic’s core strengths.
 
+Another important goal is for Mimic to be easy to package and run in Docker, so that the same mock setup can be reused consistently across local development, CI pipelines, and container-based integration tests.
+
 ---
 
 ## Project Status
 
 🚧 **Work in progress**
 
-Mimic is still in active development and is not ready for real use yet.
+Mimic is still in active development and is not production-ready yet.
 
 At this stage, the project is an early MVP foundation.
 
@@ -66,6 +81,14 @@ The current implementation can already:
 - return configured responses
 
 It is still not feature-complete and is not ready for production use yet.
+
+The main product direction is already clear, even though the implementation is still early:
+
+- portable YAML mock definitions
+- standalone HTTP mock server
+- Docker-friendly runtime
+- cross-language integration testing support
+- strong Testcontainers fit
 
 Not included in the MVP yet:
 
@@ -102,7 +125,7 @@ endpoints:
 ## Planned Core Concepts
 
 ### `MockApiConfig`
-Represents the root configuration loaded from YAML.
+Represents a single mock API definition loaded from YAML.
 
 ### `MockEndpoint`
 Defines a mock endpoint, including HTTP method and path.
@@ -125,25 +148,25 @@ Mimic can currently load either a single YAML file or a folder containing multip
 Run with the default `mocks.yaml` in the server project:
 
 ```bash
-dotnet run --project Mimic.Server
+dotnet run --project Mimic.Server -- --urls http://localhost:5000
 ```
 
 Run with an explicit file:
 
 ```bash
-dotnet run --project Mimic.Server -- --config client.yaml
+dotnet run --project Mimic.Server -- --urls http://localhost:5000 --config client.yaml
 ```
 
 Run with a folder of YAML files:
 
 ```bash
-dotnet run --project Mimic.Server -- --config ./clients
+dotnet run --project Mimic.Server -- --urls http://localhost:5000 --config ./clients
 ```
 
 Then call a configured endpoint:
 
 ```bash
-curl http://localhost:5000/hello
+curl http://localhost:5213/hello
 ```
 
 Example response:
