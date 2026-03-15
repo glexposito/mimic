@@ -2,17 +2,24 @@ using Mimic.Core.Models;
 
 namespace Mimic.Server.Config;
 
-public sealed class FileMockApiConfigProvider(
-    MockApiConfigLoader loader,
-    IConfiguration configuration,
-    IHostEnvironment environment)
-    : IMockApiConfigProvider
+public sealed class FileMockApiConfigProvider : IMockApiConfigProvider
 {
-    public IReadOnlyList<MockApiConfig> GetCurrent()
+    private readonly IReadOnlyList<MockApiConfig> _configs;
+
+    public FileMockApiConfigProvider(
+        MockApiConfigLoader loader,
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         var configuredPath = configuration["Mimic:ConfigPath"] ?? "mocks.yaml";
-        var fullPath = ResolvePath(configuredPath);
+        var fullPath = ResolvePath(configuredPath, environment);
+        _configs = LoadConfigs(loader, fullPath);
+    }
 
+    public IReadOnlyList<MockApiConfig> GetCurrent() => _configs;
+
+    private static IReadOnlyList<MockApiConfig> LoadConfigs(MockApiConfigLoader loader, string fullPath)
+    {
         if (File.Exists(fullPath))
         {
             return [loader.Load(fullPath)];
@@ -31,13 +38,13 @@ public sealed class FileMockApiConfigProvider(
                 throw new InvalidOperationException($"No YAML config files were found in '{fullPath}'.");
             }
 
-            return configFiles.Select(loader.Load).ToArray();
+            return [.. configFiles.Select(loader.Load)];
         }
 
         throw new FileNotFoundException($"Mock config path '{fullPath}' was not found.", fullPath);
     }
 
-    private string ResolvePath(string configuredPath)
+    private static string ResolvePath(string configuredPath, IHostEnvironment environment)
     {
         if (Path.IsPathRooted(configuredPath))
         {
